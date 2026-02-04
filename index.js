@@ -207,17 +207,18 @@
         }
 
         // GUI-Feedback
-        drawerTitleEl.textContent = loadedRemote ? "🌍 Netzwerk" : (rootName + " (Lokal)");
-        if (loadedRemote) {
-            drawerTitleEl.style.color = "hsl(var(--primary))"; // Visuelles Feedback
-        }
+        // GUI-Feedback
+        drawerTitleEl.textContent = "FIAE AP2";
 
         treeRootEl.innerHTML = '';
         buildTreeHelper(treeRootEl, rootTree, 0);
 
         // Initial View
-        viewTitleEl.textContent = loadedRemote ? 'Bereit (Netzwerk)' : 'Bereit (Lokal)';
-        viewPathEl.textContent = backendUrl && !loadedRemote ? "Verbindung fehlgeschlagen" : rootName;
+        // Initial View - Clean State
+        viewTitleEl.textContent = '';
+        viewPathEl.textContent = '';
+        contentHeader.classList.add('hidden'); // Header ausblenden (Buttons/Titel weg)
+
         viewBodyEl.innerHTML = '<p style="padding:2rem; color:hsl(var(--txt-muted))">Bitte wähle eine Datei aus dem Menü.</p>';
         contentEl.classList.remove('full-screen');
         viewBodyEl.classList.remove('iframe-container');
