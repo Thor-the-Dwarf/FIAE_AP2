@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mini-Escape-Game</title>
+
+    <!-- Glas-Look aus deinem globalen Theme -->
+    <link rel="stylesheet" href="../shared_theme.css">
+    <link rel="stylesheet" href="Escape-Game.css">
+</head>
+
+<body>
+    <div class="page">
+        <main class="panel">
+            <div class="game-content">
+                <header class="header">
+                    <div class="title-block">
+                        <h1>Mini-Escape-Room</h1>
+                        <p>Löse alle Aufgaben, bevor die Zeit ebgelaufen ist</p>
+                    </div>
+                    <div class="stats">
+                        <div class="stat-chip stat-chip--timer">
+                            <span>Zeit</span>
+                            <span id="stat-timer">03:00</span>
+                        </div>
+                        <div class="stat-chip">
+                            <span>Rätsel gelöst</span>
+                            <span id="stat-solved">0 / 3</span>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="toolbar">
+                    <button class="btn-secondary btn" id="restart-btn" type="button">
+                        <span>↻</span> Neu starten
+                    </button>
+                </div>
+
+                <div class="door-wrapper">
+                    <div class="door-scene">
+                        <div class="door-sign door-sign--closed" id="door-sign">GESCHLOSSEN</div>
+                        <div class="door" id="door"></div>
+                        <div class="door-floor"></div>
+                        <div class="door-glow" id="door-glow"></div>
+                    </div>
+                </div>
+
+                <div class="layout-grid" id="puzzle-container">
+                    <!-- Puzzles will be generated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Konfiguration laden -->
+    <script src="../config.js"></script>
+    <script src="game_base.js"></script>
+
+    <!-- JSON-Interpretation + lokale Demo-Config -->
+
+
+    <!-- Spiel-Logik -->
+    <script src="Escape-Game.js"></script>
+</body>
+
+</html>

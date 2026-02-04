@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Wer-bin-ich?</title>
+
+  <!-- Global Theme System -->
+  <link rel="stylesheet" href="../shared_theme.css">
+
+  <!-- Game-specific Styles -->
+  <link rel="stylesheet" href="wer_bin_ich.css">
+</head>
+
+<body>
+  <div id="game-root">
+    <div class="page">
+      <!-- Header with Theme Toggle -->
+      <header>
+        <div>
+          <div class="badge">Wer-bin-ich?</div>
+          <h1 class="game-title">Loading...</h1>
+        </div>
+        <div class="header-actions">
+          <!-- New Game Button -->
+          <button id="new-game-btn" type="button">
+            <span class="icon">🎲</span>
+            <span>Neue Runde</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- 2-Column Layout -->
+      <div class="layout">
+        <!-- Left Column: Question Catalog & Answers -->
+        <section>
+          <div class="stats-row">
+            <div class="stat-chip">
+              <span class="label">Fragen</span>
+              <span class="value" id="question-count">0</span>
+            </div>
+            <p class="secret-hint" id="secret-hint">
+              <!-- Secret hint will be injected here -->
+            </p>
+          </div>
+
+          <h2>Fragenkatalog</h2>
+          <p class="section-subtitle">
+            Klicke auf eine Frage, um sie zu stellen.
+          </p>
+          <div id="question-list" class="question-list"></div>
+
+          <div class="answer-section">
+            <h2 id="answer-section-title">Antwort</h2>
+            <div class="answer-buttons">
+              <button class="answer-btn" data-type="yes">Ja</button>
+              <button class="answer-btn" data-type="no">Nein</button>
+            </div>
+            <p id="answer-text" class="answer-text">
+              Stelle eine Frage aus dem Katalog, um eine Antwort zu erhalten.
+            </p>
+            <ul id="history-list" class="history-list"></ul>
+          </div>
+        </section>
+
+        <!-- Right Column: Guessing & Info -->
+        <section>
+          <h2 id="guess-section-title">Raten</h2>
+          <p class="section-subtitle">
+            Nutze deine Hinweise, um die Lösung zu finden.
+          </p>
+          <div class="guess-section">
+            <div class="guess-row">
+              <input id="guess-input" type="text" placeholder="...">
+              <button id="guess-btn" type="button">Raten</button>
+            </div>
+            <p id="guess-feedback"></p>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <h2 id="pool-section-title">Im Pool</h2>
+            <p class="section-subtitle" style="margin-bottom:6px;">
+              Diese Elemente kommen aktuell im Spiel vor:
+            </p>
+            <ul class="info-list" id="pool-list">
+              <!-- Will be filled dynamically -->
+            </ul>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configuration -->
+  <script src="../config.js"></script>
+
+  <!-- Game Base Class -->
+  <script src="game_base.js"></script>
+
+  <!-- Payload Interpreter - REMOVED -->
+
+  <!-- Game Logic -->
+  <script src="wer_bin_ich.js"></script>
+</body>
+
+</html>

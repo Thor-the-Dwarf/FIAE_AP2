@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Matching-Puzzle</title>
+
+    <!-- Global Theme System -->
+    <link rel="stylesheet" href="../shared_theme.css">
+
+    <!-- Game-specific Styles -->
+    <link rel="stylesheet" href="matching_puzzle.css">
+</head>
+
+<body>
+    <div id="game-root">
+        <div class="page">
+            <!-- Header with Theme Toggle -->
+            <header>
+                <div>
+                    <div class="badge">Matching-Puzzle</div>
+                    <h1 class="game-title">Loading...</h1>
+                </div>
+                <div class="header-actions">
+                    <!-- Next Round Button -->
+                    <button id="next-round-btn" type="button" style="display: none;">
+                        <span class="icon">➡️</span>
+                        <span>Nächste Runde</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-chip">
+                    <span class="stat-label">Gefundene Sets</span>
+                    <span class="stat-value" id="found-sets">0/0</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-label">Versuche</span>
+                    <span class="stat-value" id="attempts">0</span>
+                </div>
+            </div>
+
+            <!-- Subtitle/Instructions -->
+            <p class="subtitle">
+                Ziel: Wähle jeweils eine Karte aus jeder Spalte (Name, Beschreibung, Praxisbeispiel), sodass ein
+                passender Dreier-Satz entsteht.
+                Klicke erneut auf eine Karte, um sie abzuwählen.
+            </p>
+
+            <!-- 3-Column Grid -->
+            <div id="columns-container" class="columns">
+                <!-- Columns will be generated here -->
+            </div>
+
+            <!-- Feedback -->
+            <p id="feedback" class="info">
+                Wähle einen Namen, dann eine Beschreibung und ein Beispiel, um ein Set zu testen.
+            </p>
+        </div>
+    </div>
+
+    <!-- Configuration -->
+    <script src="../config.js"></script>
+
+    <!-- Game Base Class -->
+    <script src="game_base.js"></script>
+
+    <!-- Payload Interpreter -->
+    <!-- Payload Interpreter - REMOVED -->
+
+    <!-- Game Logic -->
+    <script src="matching_puzzle.js"></script>
+</body>
+
+</html>

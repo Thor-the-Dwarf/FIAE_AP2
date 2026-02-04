@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Spiellader</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .loading {
+            font-family: sans-serif;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .error {
+            color: #f87171;
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="status" class="loading">Inhalt wird geladen...</div>
+
+    <script>
+        (async function () {
+            const params = new URLSearchParams(window.location.search);
+            const filePath = params.get('file');
+
+            if (!filePath) {
+                showError('Keine Datei angegeben.');
+                return;
+            }
+
+            try {
+                let data = null;
+                const storageKey = 'game_payload_' + filePath;
+
+                // 1. Versuch: Daten aus sessionStorage (gepuffert vom Host)
+                const cached = sessionStorage.getItem(storageKey);
+                if (cached) {
+                    try {
+                        data = JSON.parse(cached);
+                        console.log('Spiel-Daten aus Cache geladen:', filePath);
+                    } catch (e) {
+                        console.warn('Fehler beim Parsen der Cache-Daten');
+                    }
+                }
+
+                // 2. Fallback: Datei laden
+                if (!data) {
+                    // Wenn filePath eine absolute URL ist (vom Backend), nutzen wir sie direkt.
+                    // Sonst: relative Navigation '../'
+                    const fetchUrl = filePath.startsWith('http') ? filePath : '../' + filePath;
+
+                    const res = await fetch(fetchUrl);
+                    if (!res.ok) throw new Error(`Ladefehler: ${res.status}`);
+                    data = await res.json();
+                }
+
+                // 3. Spiel-Typ bestimmen
+                const gameType = data.game_type || data.gameType;
+                if (!gameType) throw new Error('Unbekannter Spiel-Typ (kein game_type im JSON).');
+
+                // 3. Mapping GameType -> HTML
+                const mapping = {
+                    'escape_game': 'Escape-Game.html',
+                    'matching_puzzle': 'matching_puzzle.html',
+                    'quick_quiz': 'quick_quiz.html',
+                    'sortier_spiel': 'sortier_spiel.html',
+                    'wer_bin_ich': 'wer_bin_ich.html',
+                    'what_and_why': 'what_and_why.html'
+                };
+
+                const targetHtml = mapping[gameType];
+                if (!targetHtml) throw new Error(`Kein Template für Spieltyp "${gameType}" gefunden.`);
+
+                // 4. Payload speichern für GameBase
+                // Wir speichern den Pfad, GameBase lädt ihn dann selbst (oder wir übergeben das Objekt)
+                sessionStorage.setItem('game_payload_id', filePath);
+
+                // 5. Weiterleitung
+                window.location.href = targetHtml;
+
+            } catch (e) {
+                showError(e.message);
+            }
+
+            function showError(msg) {
+                document.getElementById('status').innerHTML = `<div class="error"><h3>Fehler</h3><p>${msg}</p></div>`;
+            }
+        })();
+    </script>
+</body>
+
+</html>

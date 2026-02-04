@@ -1,0 +1,320 @@
+/**
+ * ============================================================================
+ * shared_theme.css - Globales Theme-System für Skill-Station
+ * ============================================================================
+ * 
+ * ZWECK:
+ * ------
+ * Diese Datei definiert das zentrale Design-System für die gesamte Anwendung.
+ * Sie verwendet CSS Custom Properties (Variablen) für ein konsistentes,
+ * wartbares und theme-fähiges Design.
+ * 
+ * DESIGN-PHILOSOPHIE:
+ * -------------------
+ * - **Glassmorphism**: Halbtransparente Elemente mit Blur-Effekten
+ * - **Cyber-Aesthetik**: Neon-Glows und elektrische Akzente
+ * - **HSL-Farbsystem**: Flexible Farbmanipulation über Hue-Sat-Lightness
+ * - **Dark/Light Mode**: Vollständige Theme-Unterstützung
+ * 
+ * VERWENDUNG:
+ * -----------
+ * Diese Datei sollte in jeder HTML-Datei eingebunden werden:
+ *   <link rel="stylesheet" href="shared_theme.css">
+ * 
+ * oder für Dateien im games-Ordner:
+ *   <link rel="stylesheet" href="../shared_theme.css">
+ * 
+ * THEME-WECHSEL:
+ * --------------
+ * Füge die Klasse 'theme-light' zum <html>-Element hinzu:
+ *   document.documentElement.classList.add('theme-light');
+ * 
+ * Für Dark Mode entferne die Klasse:
+ *   document.documentElement.classList.remove('theme-light');
+ * 
+ * VERFÜGBARE KOMPONENTEN:
+ * -----------------------
+ * - .card / .section-card: Glassmorphismus-Karten
+ * - .btn / .btn.primary: Buttons mit Glow-Effekten
+ * - input / select / textarea: Styled Form-Elemente
+ * - .section-status: Status-Pills mit Farb-Varianten
+ * 
+ * CSS-VARIABLEN VERWENDEN:
+ * ------------------------
+ * In deinem eigenen CSS kannst du die Variablen nutzen:
+ *   background: hsl(var(--bg-surface) / 0.5);
+ *   color: hsl(var(--primary));
+ *   border: 1px solid hsl(var(--glass-border));
+ * 
+ * NEUE FARBEN HINZUFÜGEN:
+ * -----------------------
+ * 1. Definiere die Farbe in :root als HSL-Triplet:
+ *    --my-color: 120 80% 50%;
+ * 
+ * 2. Optional: Überschreibe sie in :root.theme-light:
+ *    --my-color: 120 40% 30%;
+ * 
+ * 3. Verwende sie in deinen Styles:
+ *    color: hsl(var(--my-color));
+ * 
+ * PERFORMANCE-TIPPS:
+ * ------------------
+ * - backdrop-filter: blur() ist performance-intensiv, verwende es sparsam
+ * - Glow-Effekte (box-shadow) können bei vielen Elementen FPS beeinflussen
+ * - Transformations (translateY, scale) sind GPU-beschleunigt = performant
+ * 
+ * ============================================================================
+ */
+
+:root {
+    /* 
+       HSL Color System - "Cyber-Glass" Edition
+       High Transparency & Neon Glows
+       
+       WARUM HSL?
+       ----------
+       HSL (Hue, Saturation, Lightness) ist ideal für Theme-Systeme:
+       - Hue: Der Farbton (0-360°)
+       - Saturation: Die Sättigung (0-100%)
+       - Lightness: Die Helligkeit (0-100%)
+       
+       Dies ermöglicht einfache Anpassungen:
+       - Hellere Variante: Lightness erhöhen
+       - Gedämpftere Farbe: Saturation verringern
+       - Transparenz: "/" Syntax verwenden
+       
+       VERWENDUNG:
+       -----------
+       Statt: color: hsl(195, 100%, 60%);
+       Nutze: color: hsl(var(--primary)); /* nutzt die Variable */
+
+    Mit Transparenz:
+        background: hsl(var(--primary) / 0.5);
+    /* 50% transparent */
+    */
+    /* Brand / Accent - Cyan/Electric Blue */
+    --primary-hue: 195;
+    --primary-sat: 100%;
+    --primary-lig: 60%;
+
+    --primary: var(--primary-hue) var(--primary-sat) var(--primary-lig);
+    --primary-fg: 0 0% 100%;
+
+    /* Base - Deep Space Dark */
+    --bg-hue: 230;
+    --bg-sat: 30%;
+    --bg-lig: 6%;
+
+    --bg: var(--bg-hue) var(--bg-sat) var(--bg-lig);
+
+    /* Surface Colors - Base opacity 0.3 for glass feel */
+    --bg-surface: 230 30% 15%;
+    --bg-surface-alpha: 0.75;
+    /* 25% opacity = 75% transparent */
+    --bg-surface-2-alpha: 0.35;
+
+    /* Text */
+    --txt: 210 50% 98%;
+    --txt-muted: 215 30% 75%;
+    /* Brighter muted for contrast on dark */
+
+    /* Status */
+    --success: 142 80% 50%;
+    --error: 0 90% 65%;
+
+    /* Sizing */
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1.25rem;
+
+    /* Shadows & Glows */
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+
+    /* Neon Glows */
+    --glow-primary: 0 0 15px hsl(var(--primary) / 0.6), 0 0 30px hsl(var(--primary) / 0.3);
+    --glow-text: 0 0 10px hsl(var(--primary) / 0.8);
+    --glow-border: 0 0 8px hsl(var(--primary) / 0.4);
+
+    /* Glass Vars */
+    --glass-bg: 230 30% 10%;
+    --glass-opacity: 0.85;
+    /* Extremely transparent (85%) */
+    --glass-border: 210 50% 30%;
+    --glass-blur: 20px;
+}
+
+/* Light Theme Override - Kept "Frosty" */
+:root.theme-light {
+    --bg-hue: 210;
+    --bg-sat: 30%;
+    --bg-lig: 95%;
+
+    --bg: var(--bg-hue) var(--bg-sat) var(--bg-lig);
+
+    /* FIX: gültige HSL-Werte für Light-Theme-Flächen */
+    --bg-surface: 0 0% 100%;
+    --bg-surface-alpha: 0.4;
+    --bg-surface-2-alpha: 0.5;
+
+    --txt: 222 47% 11%;
+    --txt-muted: 215 16% 47%;
+
+    /* FIX: gültige HSL-Werte für Glas-Hintergrund im Light-Theme */
+    --glass-bg: 0 0% 100%;
+    --glass-opacity: 0.3;
+    --glass-border: 214 32% 80%;
+
+    --glow-primary: 0 4px 20px hsl(var(--primary) / 0.4);
+    --glow-text: none;
+}
+
+/* --- Global Resets & Typography --- */
+body {
+    background-color: hsl(var(--bg));
+    color: hsl(var(--txt));
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin: 0;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* --- Components --- */
+
+/* Cards - Glassy */
+.card,
+.section-card {
+    background: hsl(var(--bg-surface) / var(--bg-surface-alpha));
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid hsl(var(--glass-border) / 0.5);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    /* Glass shadow */
+    margin-bottom: 1.5rem;
+    color: hsl(var(--txt));
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    border-color: hsl(var(--glass-border));
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
+.card h2,
+.section-title {
+    margin-top: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: hsl(var(--txt));
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.section-sub {
+    color: hsl(var(--txt-muted));
+    font-size: 0.925rem;
+    margin-bottom: 1rem;
+}
+
+/* Buttons */
+.btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.925rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: hsl(var(--bg-surface) / 0.3);
+    color: hsl(var(--txt));
+    border: 1px solid hsl(var(--glass-border));
+    text-decoration: none;
+    backdrop-filter: blur(4px);
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary));
+    box-shadow: var(--glow-primary);
+    color: hsl(var(--primary));
+    text-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+    background: hsl(var(--bg-surface) / 0.5);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn.primary {
+    background: hsl(var(--primary) / 0.8);
+    color: hsl(var(--primary-fg));
+    border-color: transparent;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+}
+
+.btn.primary:hover:not(:disabled) {
+    filter: brightness(1.2);
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.6);
+}
+
+/* Inputs */
+input,
+select,
+textarea {
+    background: hsl(var(--bg-surface) / 0.8);
+    border: 1px solid hsl(var(--glass-border));
+    color: hsl(var(--txt));
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    width: 100%;
+    transition: all 0.3s;
+    backdrop-filter: blur(4px);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    box-shadow: var(--glow-primary);
+    background: hsl(var(--bg-surface) / 0.8);
+}
+
+/* Status Pills */
+.section-status {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    background: hsl(var(--bg-surface) / 0.7);
+    border: 1px solid hsl(var(--glass-border));
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: hsl(var(--txt-muted));
+    display: inline-block;
+    backdrop-filter: blur(4px);
+}
+
+.section-status--done {
+    background: hsl(var(--success) / 0.85);
+    color: hsl(var(--success));
+    border-color: hsl(var(--success) / 0.4);
+    box-shadow: 0 0 10px hsl(var(--success) / 0.2);
+}
+
+.section-status--fail {
+    background: hsl(var(--error) / 0.85);
+    color: hsl(var(--error));
+    border-color: hsl(var(--error) / 0.4);
+    box-shadow: 0 0 10px hsl(var(--error) / 0.2);
+}

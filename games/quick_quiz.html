@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Quick-Quiz</title>
+
+  <!-- Global Theme System -->
+  <link rel="stylesheet" href="../shared_theme.css">
+
+  <!-- Game-specific Styles -->
+  <link rel="stylesheet" href="quick_quiz.css">
+</head>
+
+<body>
+  <div id="game-root">
+    <div class="page">
+      <!-- Header with Theme Toggle and Controls -->
+      <header>
+        <div>
+          <div class="badge">Quick-Quiz</div>
+          <h1 class="game-title">Loading...</h1>
+        </div>
+        <div class="header-actions">
+          <!-- Restart Button -->
+          <button id="restart-btn" type="button">
+            <span class="icon" id="restart-icon">▶</span>
+            <span id="restart-label">Start</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Quiz Panel -->
+      <div class="top-row">
+        <div class="panel">
+          <h2 id="question-section-title">Frage</h2>
+
+          <!-- Stats Row -->
+          <div class="stats-row">
+            <div class="stat-chip">
+              <span class="stat-label" id="label-score">Score</span>
+              <span class="stat-value" id="score">0</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-label" id="label-highscore">Highscore</span>
+              <span class="stat-value" id="highscore">0</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-label" id="label-questions">Fragen</span>
+              <span class="stat-value" id="question-count">0</span>
+            </div>
+            <div class="stat-chip">
+              <span class="stat-label" id="label-streak">Streak</span>
+              <span class="stat-value" id="streak">0</span>
+            </div>
+          </div>
+
+          <!-- Timer -->
+          <div class="timer-container">
+            <div class="timer-label-row">
+              <span id="label-timer">Timer</span>
+              <span id="timer-label">– s</span>
+            </div>
+            <div class="timer-bar">
+              <div id="timer-bar-inner" class="timer-bar-inner"></div>
+            </div>
+          </div>
+
+          <!-- Question -->
+          <p class="question-text" id="question-text">
+            Loading...
+          </p>
+          <p class="subline" id="subline">
+            <!-- Dynamic subline -->
+          </p>
+
+          <!-- Answer Options -->
+          <div id="options" class="options-grid"></div>
+
+          <!-- Feedback -->
+          <p id="feedback"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configuration -->
+  <script src="../config.js"></script>
+
+  <!-- Game Base Class -->
+  <script src="game_base.js"></script>
+
+  <!-- Payload Interpreter - REMOVED -->
+
+  <!-- Game Logic -->
+  <script src="quick_quiz.js"></script>
+</body>
+
+</html>
