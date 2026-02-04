@@ -69,7 +69,12 @@
 
     // --- 3. App Logic ---
     function init() {
-        loadAppState();
+        // "Cache leeren" Logik bei jedem Start:
+        localStorage.removeItem(STATE_KEY);
+        sessionStorage.clear();
+        // Wir laden den gespeicherten State NICHT mehr (kein loadAppState mehr)
+        // appState bleibt auf Default (geschlossene Ordner)
+
         initTheme();
 
         // Event Listeners
