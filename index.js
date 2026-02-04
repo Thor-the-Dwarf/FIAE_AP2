@@ -152,66 +152,60 @@
 
     async function initLocalApp() {
         const backendUrl = window.AppConfig.backendUrl || '';
+        let loadedRemote = false;
 
-        // Falls wir eine Backend-URL haben, erzwingen wir ein frisches Laden (kein lokaler Cache)
+        // 1. Versuch: Remote laden, falls URL konfiguriert
         if (backendUrl) {
-            console.log("Erzwinge frisches Laden vom Backend:", backendUrl);
+            console.log("Versuche Netzwerk-Verbindung zu:", backendUrl);
             try {
-                // Wir laden app_index.js dynamisch als Script mit Cache-Buster
-                await new Promise((resolve, reject) => {
-                    const script = document.createElement('script');
-                    // Cache-Buster hinzufügen (?t=...)
-                    const cacheBuster = 't=' + new Date().getTime();
-                    script.src = getRemoteUrl('app_index.js') + (getRemoteUrl('app_index.js').includes('?') ? '&' : '?') + cacheBuster;
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    document.head.appendChild(script);
-                });
-                rootTree = window.DATABASE_INDEX || [];
+                const cacheBuster = '?t=' + Date.now();
+                const targetUrl = getRemoteUrl('app_index.js') + cacheBuster;
 
-                // Optional: Den Cache für Offline-Modus aktualisieren
-                localStorage.setItem('pauker_remote_index_v1', JSON.stringify(rootTree));
+                const response = await fetch(targetUrl);
+                if (response.ok) {
+                    const textContent = await response.text();
+                    // Wir extrahieren das JSON aus: window.DATABASE_INDEX = [...];
+                    // Regex sucht nach dem Array-Start "[" und dem Ende "];" oder "]"
+                    const jsonMatch = textContent.match(/window\.DATABASE_INDEX\s*=\s*(\[[\s\S]*\]);?/);
+
+                    if (jsonMatch && jsonMatch[1]) {
+                        rootTree = JSON.parse(jsonMatch[1]);
+                        loadedRemote = true;
+                        console.log("Erfolgreich vom Netzwerk geladen:", rootTree.length, "Einträge");
+                    } else {
+                        throw new Error("Konnte JSON-Struktur in app_index.js nicht parsen.");
+                    }
+                } else {
+                    console.warn("Netzwerk-Antwort nicht OK:", response.status);
+                }
             } catch (e) {
-                console.error("Fehler beim Laden des Remote-Index:", e);
-
-                // Fallback: Wenn Netzwerk fehlschlägt, doch den Cache probieren
-                const cachedIndex = localStorage.getItem('pauker_remote_index_v1');
-                if (cachedIndex) {
-                    try {
-                        rootTree = JSON.parse(cachedIndex);
-                        console.log("Nutze Cache-Fallback nach Netzwerkfehler.");
-                    } catch (_) { }
-                }
-
-                if (!rootTree || rootTree.length === 0) {
-                    viewBodyEl.innerHTML = `<div style="padding:2rem; color:hsl(var(--error))">
-                        <h3>Netzwerk-Fehler</h3>
-                        <p>Der Index konnte nicht vom Backend geladen werden (${backendUrl}).</p>
-                    </div>`;
-                }
-            }
-        } else {
-            // Klassischer Modus: Versuche Cache, dann lokaler Index
-            const cachedIndex = localStorage.getItem('pauker_remote_index_v1');
-            if (cachedIndex) {
-                try {
-                    rootTree = JSON.parse(cachedIndex);
-                } catch (e) {
-                    rootTree = window.DATABASE_INDEX || [];
-                }
-            } else {
-                rootTree = window.DATABASE_INDEX || [];
+                console.warn("Netzwerk-Verbindung fehlgeschlagen, nutze lokalen Fallback.", e);
             }
         }
 
-        drawerTitleEl.textContent = backendUrl ? "🌍 Netzwerk" : rootName;
+        // 2. Fallback: Lokal (window.DATABASE_INDEX wurde durch <script> geladen)
+        if (!loadedRemote) {
+            if (typeof window.DATABASE_INDEX !== 'undefined') {
+                rootTree = window.DATABASE_INDEX;
+                console.log("Lokal geladen:", rootTree.length, "Einträge");
+            } else {
+                rootTree = [];
+                console.error("Kein Index verfügbar (weder Remote noch Lokal).");
+            }
+        }
+
+        // GUI-Feedback
+        drawerTitleEl.textContent = loadedRemote ? "🌍 Netzwerk" : (rootName + " (Lokal)");
+        if (loadedRemote) {
+            drawerTitleEl.style.color = "hsl(var(--primary))"; // Visuelles Feedback
+        }
 
         treeRootEl.innerHTML = '';
         buildTreeHelper(treeRootEl, rootTree, 0);
 
         // Initial View
-        viewTitleEl.textContent = 'Bereit';
-        viewPathEl.textContent = rootName;
+        viewTitleEl.textContent = loadedRemote ? 'Bereit (Netzwerk)' : 'Bereit (Lokal)';
+        viewPathEl.textContent = backendUrl && !loadedRemote ? "Verbindung fehlgeschlagen" : rootName;
         viewBodyEl.innerHTML = '<p style="padding:2rem; color:hsl(var(--txt-muted))">Bitte wähle eine Datei aus dem Menü.</p>';
         contentEl.classList.remove('full-screen');
         viewBodyEl.classList.remove('iframe-container');
@@ -312,7 +306,9 @@
 
         // PDFs und Dokumente zusätzlich direkt im neuen Tab öffnen
         if (node.kind === 'pdf' || node.kind === 'pptx') {
-            window.open(getRemoteUrl(node.id), '_blank');
+            // Bei Remote-Modus müssen wir die URL anpassen
+            const url = isRemoteMode() ? getRemoteUrl(node.id) : node.id;
+            window.open(url, '_blank');
         }
     }
 
@@ -376,14 +372,21 @@
                 viewBodyEl.classList.remove('card');
                 viewBodyEl.classList.add('iframe-container');
 
-                // Falls die Daten fehlen (dynamischer Index), müssen wir sie nachladen
+                // Laden der Daten (Lokal oder Remote)
                 if (!node.data) {
                     viewBodyEl.innerHTML = '<div style="padding:2rem; text-align:center;">Lade Spieldaten...</div>';
                     try {
-                        const cacheBuster = 't=' + new Date().getTime();
-                        const fetchUrl = getRemoteUrl(node.id) + (getRemoteUrl(node.id).includes('?') ? '&' : '?') + cacheBuster;
+                        let fetchUrl = node.id;
+
+                        // Wenn wir im Netzwerk-Modus sind oder eine URL erzwingen wollen
+                        if (isRemoteMode()) {
+                            fetchUrl = getRemoteUrl(node.id);
+                            // Cache-Buster für Daten anhängen
+                            fetchUrl += (fetchUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+                        }
+
                         const resp = await fetch(fetchUrl);
-                        if (!resp.ok) throw new Error("Datei nicht gefunden.");
+                        if (!resp.ok) throw new Error("Datei nicht gefunden: " + resp.status);
                         node.data = await resp.json();
                     } catch (e) {
                         viewBodyEl.innerHTML = `<div style="padding:2rem; color:hsl(var(--error))">Fehler beim Laden: ${e.message}</div>`;
@@ -407,7 +410,7 @@
                         <p style="color: hsl(var(--txt-muted)); margin-bottom: 2rem;">
                             Die Datei <strong>${node.name}</strong> wurde in einem neuen Tab geöffnet.
                         </p>
-                        <button class="btn primary" onclick="window.open(getRemoteUrl('${node.id}'), '_blank')">
+                        <button class="btn primary" onclick="window.open('${isRemoteMode() ? getRemoteUrl(node.id) : node.id}', '_blank')">
                             Datei erneut öffnen
                         </button>
                     </div>
@@ -424,7 +427,7 @@
                         <p style="color: hsl(var(--txt-muted)); margin-bottom: 2rem;">
                             Datei: <strong>${node.name}</strong>
                         </p>
-                        <button class="btn primary" onclick="window.open(getRemoteUrl('${node.id}'), '_blank')">
+                        <button class="btn primary" onclick="window.open('${isRemoteMode() ? getRemoteUrl(node.id) : node.id}', '_blank')">
                             Herunterladen / Öffnen
                         </button>
                     </div>
@@ -436,8 +439,13 @@
     function loadGame(node) {
         const iframe = document.createElement('iframe');
         iframe.className = 'game-iframe';
-        // Wir übergeben die absolute URL an den Game-Loader
-        iframe.src = `games/game_loader.html?file=${encodeURIComponent(getRemoteUrl(node.id))}`;
+
+        let fileParam = node.id;
+        if (isRemoteMode()) {
+            fileParam = getRemoteUrl(node.id); // Absolute URL
+        }
+
+        iframe.src = `games/game_loader.html?file=${encodeURIComponent(fileParam)}`;
         viewBodyEl.appendChild(iframe);
 
         iframe.onload = () => {
@@ -449,16 +457,27 @@
     // --- 4. Globale Hilfsfunktionen & Remote Indexing ---
 
     /**
-     * ZWECK: Erstellt eine absolute URL basierend auf der backendUrl in config.js
+     * Prüft, ob wir aktuell im Netzwerk-Modus sind.
+     * Wir erkennen das daran, ob der Drawer-Titel "Netzwerk" enthält (einfacher State-Check).
+     * Sauberer wäre eine globale Variable, aber initLocalApp setzt den Title.
+     */
+    function isRemoteMode() {
+        return drawerTitleEl.textContent.includes("Netzwerk");
+    }
+
+    /**
+     * Erstellt eine absolute URL basierend auf der backendUrl in config.js
      */
     function getRemoteUrl(path) {
         if (!path) return '';
-        if (path.startsWith('http')) return path;
+        if (path.startsWith('http')) return path; // Schon absolut
         const base = window.AppConfig.backendUrl || '';
+        // Sicherstellen, dass base mit / endet und path nicht mit / beginnt (oder umgekehrt handeln)
         const cleanBase = base.endsWith('/') ? base : base + '/';
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
         return cleanBase + cleanPath;
     }
+
 
     // Wird vom "Cache leeren" Button aufgerufen
     window.clearDriveCache = async function () {
