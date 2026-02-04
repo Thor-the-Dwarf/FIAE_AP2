@@ -75,6 +75,13 @@
         // Wir laden den gespeicherten State NICHT mehr (kein loadAppState mehr)
         // appState bleibt auf Default (geschlossene Ordner)
 
+        // Listener für Fortschritts-Updates aus den Spielen (iframe)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'pauker_progress') {
+                updateTreeProgress();
+            }
+        });
+
         initTheme();
 
         // Event Listeners
@@ -248,19 +255,40 @@
                     toggleNode(div, node.id, btn);
                 };
                 row.appendChild(btn);
+
+                const icon = document.createElement('span');
+                icon.className = 'tree-icon';
+                icon.textContent = '📁';
+                row.appendChild(icon);
             } else {
                 const sp = document.createElement('span');
                 sp.className = 'tree-spacer';
                 row.appendChild(sp);
+
+                const icon = document.createElement('span');
+                icon.className = 'tree-icon';
+                // Icon Logik
+                if (node.kind === 'pdf') icon.textContent = '📄';
+                else if (node.kind === 'pptx') icon.textContent = '📊';
+                else icon.textContent = '🎮';
+                row.appendChild(icon);
+
+                // --- FORTSCHRITTS-ANZEIGE ---
+                // Nur bei Dateien (Spielen/Docs), nicht Ordnern (oder aggregiert?)
+                // User will "hinter den Dateinamen". Also als Hintergrund.
+                const progress = getProgress(node.id);
+                if (progress > 0) {
+                    const pct = Math.round(progress * 100);
+                    // Dunkelgrüner Balken von links nach rechts
+                    // Wir nutzen linear-gradient auf dem 'row' Element.
+                    // Farbe: Dunkelgrün/Waldgrün, transparent
+                    const color = 'rgba(20, 100, 40, 0.25)';
+                    row.style.background = `linear-gradient(to right, ${color} ${pct}%, transparent ${pct}%)`;
+                    row.setAttribute('title', `Fortschritt: ${pct}%`);
+                }
             }
 
-            const icon = document.createElement('span');
-            icon.className = 'tree-icon';
-            const isOpen = appState.openedIds.includes(node.id);
-            icon.textContent = node.isFolder ? (isOpen ? "📂" : "📁") : (node.kind !== "json" ? "👁" : "🏋");
-            row.appendChild(icon);
-
-            const label = document.createElement('button');
+            const label = document.createElement('span');
             label.className = 'tree-label';
             label.textContent = node.name.replace(/\.[^.]+$/, '');
             row.appendChild(label);
@@ -583,6 +611,46 @@
             });
         });
         return root;
+    }
+
+    // --- 5. Fortschritts-System ---
+    const PROGRESS_KEY = 'pauker_progress';
+
+    function getProgress(fileId) {
+        try {
+            const raw = localStorage.getItem(PROGRESS_KEY);
+            if (!raw) return 0;
+            const data = JSON.parse(raw);
+            return data[fileId] || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Aktualisiert die visuelle Anzeige aller sichtbaren Tree-Items
+     * ohne den Baum neu zu bauen (Performance/State-Erhalt).
+     */
+    function updateTreeProgress() {
+        const rows = document.querySelectorAll('.tree-row');
+        rows.forEach(row => {
+            // Wir müssen die ID finden. Der Parent .tree-node hat data-id.
+            const nodeDiv = row.parentElement;
+            if (!nodeDiv || !nodeDiv.dataset.id) return;
+
+            const id = nodeDiv.dataset.id;
+            const progress = getProgress(id);
+
+            if (progress > 0) {
+                const pct = Math.round(progress * 100);
+                const color = 'rgba(20, 100, 40, 0.25)';
+                row.style.background = `linear-gradient(to right, ${color} ${pct}%, transparent ${pct}%)`;
+                row.setAttribute('title', `Fortschritt: ${pct}%`);
+            } else {
+                row.style.background = '';
+                row.removeAttribute('title');
+            }
+        });
     }
 
     // Initialize
