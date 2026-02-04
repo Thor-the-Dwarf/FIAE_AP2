@@ -207,13 +207,11 @@
         }
 
         // GUI-Feedback
-        // GUI-Feedback
         drawerTitleEl.textContent = "FIAE AP2";
 
         treeRootEl.innerHTML = '';
         buildTreeHelper(treeRootEl, rootTree, 0);
 
-        // Initial View
         // Initial View - Clean State
         viewTitleEl.textContent = '';
         viewPathEl.textContent = '';
